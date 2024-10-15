@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use function Laravel\Prompts\password;
 
@@ -25,12 +26,14 @@ class AuthController extends Controller
             ]);
         }
         //Create user
-        User::create([
+       $user = User::create([
             "name" => $name,
             "email" => $request->email,
-            "password" => bcrypt($request->password)
+            "password" => bcrypt($request->password),
+            "registered_at" => Carbon::now(),
         ]);
 
+        $user->assignRole('player');
         return response()->json([
             "status" => true,
             "message" => "User registered succesfully",

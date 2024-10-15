@@ -23,8 +23,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'registered_at'
     ];
-
+    protected $dates = ['registered_at'];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -47,5 +48,6 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
 }
 
