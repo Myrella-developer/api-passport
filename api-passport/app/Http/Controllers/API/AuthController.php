@@ -97,9 +97,11 @@ class AuthController extends Controller
             return response()->json($users, 200);
         } else {
             return response()->json([
+                "status" => false,
                 "message" => "Access to this information is not allowed"
             ], 403);
         }
     }
 
 }
+

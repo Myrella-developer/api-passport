@@ -18,8 +18,6 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-
-
         Permission::create(['name' => 'manage players']);
         Permission::create(['name' => 'play games']);
 
