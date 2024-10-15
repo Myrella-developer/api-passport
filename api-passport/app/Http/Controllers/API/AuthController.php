@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use function Laravel\Prompts\password;
 
@@ -13,16 +14,26 @@ class AuthController extends Controller
     public function register(Request $request){
         //Validation
         $request->validate([
-            "name" => "required|string",
+            "name" => "nullable|string",
             "email" => "required|string|email|unique:users",
             "password" => "required|confirmed",
         ]);
+
+        $name = $request->name ?? 'anonimo';
+        if($name !== 'anonimo') {
+            $request->validate([
+                'name' => 'unique:users,name',
+            ]);
+        }
         //Create user
-        User::create([
-            "name" => $request->name,
+       $user = User::create([
+            "name" => $name,
             "email" => $request->email,
-            "password" => bcrypt($request->password)
+            "password" => bcrypt($request->password),
+            "registered_at" => Carbon::now(),
         ]);
+
+        $user->assignRole('player');
         return response()->json([
             "status" => true,
             "message" => "User registered succesfully",
@@ -63,16 +74,7 @@ class AuthController extends Controller
             ]);
         }
     }
-     //GET [Auth: Token]
-     public function profile (){
-        $userData = auth()->user();
-        return response()->json([
-            "status" => true,
-            "message" => "Profile information",
-            "data" => $userData,
-            "id" => auth()->user()->id
-        ]);
-     }
+
      //GET [Auth: Token]
      public function logout()
      {
@@ -83,4 +85,21 @@ class AuthController extends Controller
              "message" => "User logged out successfully",
          ]);
      }
+
+     public function showAllPlayers(Request $request) {
+        if ($request->user()->hasRole('admin')) {
+            $users = User::all();
+
+            if ($users->isEmpty()) {
+                return response()->json(['message' => 'No hay jugadores registrados'], 200);
+            }
+
+            return response()->json($users, 200);
+        } else {
+            return response()->json([
+                "message" => "Access to this information is not allowed"
+            ], 403);
+        }
+    }
+
 }

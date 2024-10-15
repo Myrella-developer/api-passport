@@ -10,13 +10,15 @@ Route::post("login", [AuthController::class, "login"]);
 Route::group([
     "middleware" => ["auth:api"]
 ], function(){
-    Route::get("profile", [AuthController::class, "profile"]);
     Route::get("logout", [AuthController::class, "logout"]);
+});
+Route::group([
+    "middleware" => ["auth:api", "role:admin"]
+], function(){
+    Route::get("players", [AuthController::class, "showAllPlayers"]);
 });
 // Route::get('/user', function(Request $request) {
 //     return $request->user();
 // })->middleware('auth:api');
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:api');
+
