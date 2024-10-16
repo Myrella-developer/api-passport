@@ -92,7 +92,9 @@ class AuthController extends Controller
             $users = User::all();
 
             if ($users->isEmpty()) {
-                return response()->json(['message' => 'No players found'], 200);
+                return response()->json([
+                    'message' => 'No players found'
+                ], 200);
             }
 
             return response()->json($users, 200);
@@ -109,7 +111,10 @@ class AuthController extends Controller
         if ($request->user()->hasRole('admin')) {
             $players = User::has('games')->get();
             if($players->isEmpty()){
-                return response()->json(['status' => false, 'message' => 'No players found'], 404);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No players found'
+                ], 404);
             }
                 $averageRanking = $players->map(function ($player) {
                 $totalGames = $player->games->count();
@@ -136,12 +141,14 @@ class AuthController extends Controller
     }
 
     public function getLoser(Request $request) {
-
         if ($request->user()->hasRole('admin')) {
             $players = User::has('games')->get();
 
             if ($players->isEmpty()) {
-                return response()->json(['status' => false, 'message' => 'No players found'], 404);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No players found'
+                ], 404);
             }
             if ($players->count() === 1) {
                 return response()->json([
@@ -163,7 +170,7 @@ class AuthController extends Controller
                     'player' => $player,
                     'winPercentage' => $winPercentage
                 ];
-            })->sortBy('winPercentage')->first(); // Ordenar por porcentaje de victorias
+            })->sortBy('winPercentage')->first();
 
             return response()->json([
                 "status" => true,
@@ -176,5 +183,88 @@ class AuthController extends Controller
             ], 403);
         }
     }
+
+    public function getWinner(Request $request) {
+        if ($request->user()->hasRole('admin')) {
+            $players = User::has('games')->get();
+
+            if ($players->isEmpty()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No players found'
+                ], 404);
+            }
+
+            if ($players->count() === 1) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'No hay otros jugadores para comparar.',
+                    'winner' => $players->first(),
+                ], 200);
+            }
+
+
+            $winner = $players->map(function ($player) {
+                $totalGames = $player->games->count();
+                $wonGames = $player->games->filter(function ($game) {
+                    return ($game->dado1 + $game->dado2) === self::WINNED_GAME;
+                })->count();
+                $winPercentage = $totalGames > 0 ? ($wonGames / $totalGames) * 100 : 0;
+
+                return [
+                    'player' => $player,
+                    'winPercentage' => $winPercentage,
+                ];
+            })->sortByDesc('winPercentage')->first();
+
+            return response()->json([
+                'status' => true,
+                'winner' => $winner,
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Access to this information is not allowed'
+            ], 403);
+        }
+    }
+
+    public function updatePlayer(Request $request, string $id) {
+        $userToUpdate = User::findOrFail($id);
+        $authUser = $request->user();
+
+        if ($authUser->id !== $userToUpdate->id) {
+            return response()->json([
+                'message' => 'You cannot modify another user\'s name.'
+            ], 403);
+        }
+
+        $request->validate([
+            'name' => 'nullable|string',
+        ]);
+
+        $newName = empty($request->name) ? 'anónimo' : $request->name;
+
+        if($newName !== 'anónimo') {
+            $existingUser = User::where('name', $newName)->first();
+            if ($existingUser && $existingUser->id !== $user->id) {
+                return response()->json([
+                    'message' => 'The name is already in use. Please choose another one.'
+                ], 400);
+            }
+            $request->validate([
+                'name' => 'unique:users,name',
+            ]);
+        }
+
+        $userToUpdate->name = $newName;
+        $userToUpdate->save();
+
+        return response()->json([
+            'message' => 'New Name is ' . $newName . ', Change Completed'
+        ], 200);
+    }
+
+
 }
 
