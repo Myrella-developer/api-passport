@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\API;
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Game;
 use Illuminate\Http\Request;
@@ -32,7 +32,9 @@ class GameController extends Controller
         }
 
         $totalGames = $games->count();
-        $wonGames = $games->where('winner', true)->count();
+        $wonGames = $games->filter(function ($game) {
+            return ($game->dado1 + $game->dado2) === self::WINNED_GAME;
+        })->count();
         $winPercentage = $totalGames > 0 ? ($wonGames / $totalGames) * 100 : 0;
 
         $formattedGames = $games->map(function ($game, $index) {
@@ -40,7 +42,7 @@ class GameController extends Controller
                 'Game number' => $index + 1,
                 'Dado 1' => $game->dado1,
                 'Dado 2' => $game->dado2,
-                'Result' => $game->winner ? 'Win' : 'Lose',
+                'Resultado' => $game->resultado ? 'Win' : 'Lose',
             ];
         });
 
@@ -67,17 +69,17 @@ class GameController extends Controller
 
         $dado1 = rand(1, 6);
         $dado2 = rand(1, 6);
-        $winner = ($dado1 + $dado2) === self::WINNED_GAME;
+        $resultado = ($dado1 + $dado2) === self::WINNED_GAME;
 
         Game::create([
             'user_id' => $userId,
             'dado1' => $dado1,
             'dado2' => $dado2,
-            'winner' => $winner,
+            'resultado' => $resultado,
         ]);
 
         return response()->json([
-            'message' => $winner ? 'You win! Your dice values:' : 'You lose. Your dice values:',
+            'message' => $resultado ? 'You win! Your dice values:' : 'You lose. Your dice values:',
             'Dado 1' => $dado1,
             'Dado 2' => $dado2,
             'Total' => $dado1 + $dado2,
