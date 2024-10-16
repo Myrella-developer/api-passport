@@ -21,6 +21,9 @@ Route::group(["middleware" => ["auth:api"]], function() {
     Route::delete('/players/{id}/games', [GameController::class, 'deleteGames']); //
 
     Route::get("logout", [AuthController::class, "logout"]);// funciona
+
+    //Ruta para cambiar el nombre del jugador
+    Route::put('/players/{id}', [AuthController::class, 'updatePlayer']); //funciona
 });
 
 // Rutas administradas por el middleware de admin
@@ -28,5 +31,5 @@ Route::group(["middleware" => ["auth:api", "role:admin"]], function() {
     Route::get('/players', [AuthController::class, 'showAllPlayers']); // funciona y solo admin
     Route::get('/players/ranking', [AuthController::class, 'getAverageRanking']); // funciona y solo admin
     Route::get('/players/ranking/loser', [AuthController::class, 'getLoser']); // funciona y solo admin
-    Route::get('/players/ranking/winner', [AuthController::class, 'getWinner']);
+    Route::get('/players/ranking/winner', [AuthController::class, 'getWinner']); // funciona y solo admin
 });
