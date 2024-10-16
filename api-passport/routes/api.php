@@ -26,7 +26,7 @@ Route::group(["middleware" => ["auth:api"]], function() {
 // Rutas administradas por el middleware de admin
 Route::group(["middleware" => ["auth:api", "role:admin"]], function() {
     Route::get('/players', [AuthController::class, 'showAllPlayers']); // funciona y solo admin
-    Route::get('/players/ranking', [AuthController::class, 'getAverageRanking']); //funciona y solo admin
-    Route::get('/players/ranking/loser', [AuthController::class, 'getLoser']);
+    Route::get('/players/ranking', [AuthController::class, 'getAverageRanking']); // funciona y solo admin
+    Route::get('/players/ranking/loser', [AuthController::class, 'getLoser']); // funciona y solo admin
     Route::get('/players/ranking/winner', [AuthController::class, 'getWinner']);
 });

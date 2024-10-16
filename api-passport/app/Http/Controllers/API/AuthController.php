@@ -134,5 +134,47 @@ class AuthController extends Controller
             ], 403);
         }
     }
+
+    public function getLoser(Request $request) {
+
+        if ($request->user()->hasRole('admin')) {
+            $players = User::has('games')->get();
+
+            if ($players->isEmpty()) {
+                return response()->json(['status' => false, 'message' => 'No players found'], 404);
+            }
+            if ($players->count() === 1) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'No hay otros jugadores para comparar.',
+                    'loser' => $players->first(),
+                ], 200);
+            }
+
+            $loser = $players->map(function ($player) {
+                $totalGames = $player->games->count();
+                $wonGames = $player->games->filter(function ($game) {
+                    return ($game->dado1 + $game->dado2) === self::WINNED_GAME;
+                })->count();
+
+                $winPercentage = $totalGames > 0 ? ($wonGames / $totalGames) * 100 : 0;
+
+                return [
+                    'player' => $player,
+                    'winPercentage' => $winPercentage
+                ];
+            })->sortBy('winPercentage')->first(); // Ordenar por porcentaje de victorias
+
+            return response()->json([
+                "status" => true,
+                "loser" => $loser,
+            ], 200);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Access to this information is not allowed"
+            ], 403);
+        }
+    }
 }
 
