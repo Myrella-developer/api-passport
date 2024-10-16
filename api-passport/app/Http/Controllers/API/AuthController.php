@@ -247,7 +247,7 @@ class AuthController extends Controller
 
         if($newName !== 'anónimo') {
             $existingUser = User::where('name', $newName)->first();
-            if ($existingUser && $existingUser->id !== $user->id) {
+            if ($existingUser && $existingUser->id !== $userToUpdate->id) {
                 return response()->json([
                     'message' => 'The name is already in use. Please choose another one.'
                 ], 400);
