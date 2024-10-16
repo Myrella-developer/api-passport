@@ -10,6 +10,7 @@ use function Laravel\Prompts\password;
 
 class AuthController extends Controller
 {
+    const WINNED_GAME = 7;
     //POST [name, email, passworđ]
     public function register(Request $request){
         //Validation
@@ -91,7 +92,7 @@ class AuthController extends Controller
             $users = User::all();
 
             if ($users->isEmpty()) {
-                return response()->json(['message' => 'No hay jugadores registrados'], 200);
+                return response()->json(['message' => 'No players found'], 200);
             }
 
             return response()->json($users, 200);
@@ -103,5 +104,35 @@ class AuthController extends Controller
         }
     }
 
+
+    public function getAverageRanking(Request $request){
+        if ($request->user()->hasRole('admin')) {
+            $players = User::has('games')->get();
+            if($players->isEmpty()){
+                return response()->json(['status' => false, 'message' => 'No players found'], 404);
+            }
+                $averageRanking = $players->map(function ($player) {
+                $totalGames = $player->games->count();
+                $wonGames = $player->games->filter(function ($game) {
+                    return ($game->dado1 + $game->dado2) === self::WINNED_GAME;
+                })->count();
+                $winPercentage = $totalGames > 0 ? ($wonGames / $totalGames) * 100 : 0;
+
+                return $winPercentage;
+            });
+
+            $averageOfAverage = $averageRanking->avg();
+
+            return response()->json([
+                "status" => true,
+                "average_ranking" => $averageOfAverage,
+            ], 200);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Access to this information is not allowed"
+            ], 403);
+        }
+    }
 }
 
