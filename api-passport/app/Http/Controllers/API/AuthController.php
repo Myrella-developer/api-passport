@@ -84,7 +84,7 @@ class AuthController extends Controller
          return response()->json([
              "status" => true,
              "message" => "User logged out successfully",
-         ]);
+         ],200);
      }
 
      public function showAllPlayers(Request $request) {
@@ -235,7 +235,7 @@ class AuthController extends Controller
 
         if ($authUser->id !== $userToUpdate->id) {
             return response()->json([
-                'message' => 'You cannot modify another user\'s name.'
+                "message" => "You cannot modify another user's name."
             ], 403);
         }
 
