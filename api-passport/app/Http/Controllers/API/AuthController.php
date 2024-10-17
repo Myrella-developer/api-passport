@@ -37,9 +37,9 @@ class AuthController extends Controller
         $user->assignRole('player');
         return response()->json([
             "status" => true,
-            "message" => "User registered succesfully",
+            "message" => "User registered successfully",
             "data" => []
-        ]);
+        ],201);
     }
      //POST [email, password]
     public function login (Request $request){
@@ -59,20 +59,20 @@ class AuthController extends Controller
                     "message" => "Login succesful",
                     "token" => $token,
                     "data" => []
-                ]);
+                ],200);
             }else{
                 return response()->json([
                     "status" => false,
                     "message" => "Password didn't match",
                     "data" => []
-                ]);
+                ],401);
             }
         }else{
             return response()->json([
                 "status" => false,
                 "message" => "invalid Email value",
                 "data" => []
-            ]);
+            ],401);
         }
     }
 
