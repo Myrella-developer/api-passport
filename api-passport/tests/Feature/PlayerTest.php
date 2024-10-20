@@ -271,27 +271,48 @@ class PlayerTest extends TestCase
 
     #[\PHPUnit\Framework\Attributes\Test]
     public function test_adminShow_allPlayers(){
-        $admin = User::factory()->create()->assignRole('admin');
+        // $admin = User::factory()->create()->assignRole('admin');
         User::factory()->count(3)->create(['rol' => 'player']);
 
-        $response = $this->actingAs($admin, 'api')->getJson('/api/players');
+        $response = $this->withHeaders(['Authorization' => "Bearer $this->adminToken",])->getJson('/api/players');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(6);
+        $response->assertJsonCount(5);
     }
 
-//     #[\PHPUnit\Framework\Attributes\Test]
-// public function test_adminShow_noPlayersFound(){
-//     User::query()->delete();
-//     $admin = User::factory()->create()->assignRole('admin'); // Crea un administrador
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function test_admin_getRanking_withoutPlayers(){
 
-//     $response = $this->actingAs($admin, 'api')->getJson('/api/players'); // Llama al endpoint
+    }
 
-//     $response->assertStatus(200);
-//     $response->assertJson([
-//         'message' => 'No players found',
-//     ]);
-// }
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function test_admin_getLoser_withoutPlayers(){
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->adminToken",
+        ])->getJson('api/players/ranking/loser');
+
+        $response->assertStatus(404);
+        $response->assertJson([
+            'status' => false,
+            'message' => 'No players found',
+        ]);
+
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function test_admin_getWinner_withoutPlayers() {
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer $this->adminToken",
+        ])->getJson('api/players/ranking/winner');
+
+        $response->assertStatus(404);
+        $response->assertJson([
+            'status' => false,
+            'message' => 'No players found',
+        ]);
+    }
 
 }
 
