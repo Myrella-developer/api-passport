@@ -11,9 +11,9 @@ use function Laravel\Prompts\password;
 class AuthController extends Controller
 {
     const WINNED_GAME = 7;
-    //POST [name, email, passworđ]
+
     public function register(Request $request){
-        //Validation
+
         $request->validate([
             "name" => "nullable|string",
             "email" => "required|string|email|unique:users",
@@ -26,7 +26,7 @@ class AuthController extends Controller
                 'name' => 'unique:users,name',
             ]);
         }
-        //Create user
+
        $user = User::create([
             "name" => $name,
             "email" => $request->email,
@@ -41,18 +41,18 @@ class AuthController extends Controller
             "data" => []
         ],201);
     }
-     //POST [email, password]
+
     public function login (Request $request){
         $request->validate([
             "email" => "required|email|string",
             "password" => "required"
         ]);
-        // User object
+
         $user = User::where("email", $request->email)->first();
         if(!empty($user)){
-            // User exists
+
             if(Hash::check($request->password, $user->password)){
-                //Password matched
+
               $token = $user->createToken('myToken')->accessToken;
                 return response()->json([
                     "status" => true,
@@ -76,7 +76,7 @@ class AuthController extends Controller
         }
     }
 
-     //GET [Auth: Token]
+
      public function logout()
      {
          $token = auth()->user()->token();
