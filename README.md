@@ -24,6 +24,7 @@ Este proyecto es una API RESTful creada con Laravel, diseñada para permitir a l
 - `POST /api/players/{id}/play`: Jugar un juego de dados.
 - `GET /api/players/{id}/games`: Mostrar los juegos del jugador.
 - `DELETE /api/players/{id}/games`: Eliminar todos los juegos de un jugador.
+- `PUT /api/players/{id}`: Cambia el nombre del jugador.
 - `GET /api/logout`: Cerrar sesión.
 
 ### Rutas de Administrador
