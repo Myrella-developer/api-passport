@@ -10,7 +10,7 @@ class GameController extends Controller
 {
     const WINNED_GAME = 7;
 
-    // Show all games of the player
+
     public function showGames(Request $request, string $id)
     {
         $user = User::find($id);
@@ -52,7 +52,7 @@ class GameController extends Controller
         ], 200);
     }
 
-    // Play a game
+
     public function playGame(Request $request, string $id)
     {
         $user = User::find($id);
@@ -86,7 +86,6 @@ class GameController extends Controller
         ], 200);
     }
 
-    // Delete all games of the player
     public function deleteGames(Request $request, string $id)
     {
         $user = User::find($id);
