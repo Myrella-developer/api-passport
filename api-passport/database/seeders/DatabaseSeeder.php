@@ -2,22 +2,55 @@
 
 namespace Database\Seeders;
 
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Crear permisos
+        Permission::firstOrCreate(['name' => 'manage players']);
+        Permission::firstOrCreate(['name' => 'play games']);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Crear roles
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole->givePermissionTo('manage players');
+
+        $playerRole = Role::firstOrCreate(['name' => 'player']);
+        $playerRole->givePermissionTo('play games');
+
+        // Crear el usuario administrador
+        $adminUser = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+            ]
+        );
+        $adminUser->assignRole('admin');
+
+        // Crear varios usuarios jugadores
+        $playersData = [
+            ['email' => 'player1@example.com', 'name' => 'Player One'],
+            ['email' => 'player2@example.com', 'name' => 'Player Two'],
+            ['email' => 'player3@example.com', 'name' => 'Player Three'],
+            ['email' => 'player4@example.com', 'name' => 'Player Four'],
+            ['email' => 'player5@example.com', 'name' => 'Player Five'],
+        ];
+
+        foreach ($playersData as $playerData) {
+            $playerUser = User::firstOrCreate(
+                ['email' => $playerData['email']],
+                [
+                    'name' => $playerData['name'],
+                    'password' => Hash::make('password'), // Contraseña por defecto
+                ]
+            );
+            $playerUser->assignRole('player');
+        }
     }
 }
